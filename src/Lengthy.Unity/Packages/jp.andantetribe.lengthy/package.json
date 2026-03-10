@@ -1,0 +1,16 @@
+{
+  "name": "jp.andantetribe.lengthy",
+  "version": "0.0.0",
+  "displayName": "Lengthy",
+  "description": "A long-form text UI library for Unity, purpose-built for high-performance document rendering.",
+  "unity": "2021.3",
+  "documentationUrl": "https://github.com/AndanteTribe/Lengthy/blob/main/README.md",
+  "licensesUrl": "https://github.com/AndanteTribe/Lengthy?tab=MIT-1-ov-file",
+  "dependencies": {
+      "com.unity.modules.uielements": "1.0.0"
+  },
+  "author": {
+      "name": "AndanteTribe",
+      "url": "https://github.com/AndanteTribe"
+  }
+}
