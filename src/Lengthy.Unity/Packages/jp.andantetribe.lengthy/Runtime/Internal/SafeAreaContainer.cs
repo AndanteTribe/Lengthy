@@ -7,7 +7,7 @@ using Screen = UnityEngine.Device.Screen;
 using Screen = UnityEngine.Screen;
 #endif
 
-namespace DebugToolkit
+namespace Lengthy
 {
     /// <summary>
     /// <see cref="VisualElement"/> considering safe area region

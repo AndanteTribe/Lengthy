@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿#nullable enable
+
+using UnityEngine;
+using UnityEngine.UIElements;
+using Lengthy;
 
 namespace LengthyDebug
 {
@@ -7,58 +11,71 @@ namespace LengthyDebug
     public class LengthyQuickTester : MonoBehaviour
     {
         [SerializeField]
-        private Lengthy _target;
+        private LengthyPresenter? _presenterPrefab;
 
         [SerializeField]
-        private TextAsset _textAsset;
-
-        [SerializeField]
-        private string _streamingAssetFileName = "Lengthy/sample.txt";
+        private TextAsset? _textAsset;
 
         [SerializeField]
         private string _title = "Lengthy Quick Test";
 
         [SerializeField]
-        private bool _destroyPreviousInstance = true;
+        private PanelSettings? _panelSettings;
+
+        [SerializeField]
+        private StyleSheet? _styleSheet;
 
         [SerializeField, HideInInspector]
-        private Lengthy _lastOpened;
+        private LengthyPresenter? _lastOpened;
 
-        public Lengthy ShowFromTextAsset()
+        /// <summary>
+        /// Minimal example flow:
+        /// Instantiate presenter -> optional Configure -> TryShow.
+        /// </summary>
+        public LengthyPresenter? ShowFromTextAsset()
         {
-            if (!ValidateTarget())
+            if (!ValidateSetup())
             {
                 return null;
             }
 
-            if (_destroyPreviousInstance)
-            {
-                DestroyLastOpened();
-            }
+            CloseLastOpened();
 
-            _lastOpened = _target.Show(_textAsset, _title);
-            LogResult("Show(TextAsset)", _textAsset != null ? _textAsset.name : "null", _lastOpened);
-            return _lastOpened;
-        }
+            var presenter = Instantiate(_presenterPrefab!);
+            ConfigurePresenter(presenter);
 
-        public Lengthy ShowFromFileName()
-        {
-            if (!ValidateTarget())
+            if (!presenter.TryShow(_textAsset!, out var error, _title))
             {
+                Debug.LogWarning($"LengthyQuickTester: Show failed. {error}", this);
+                Destroy(presenter.gameObject);
                 return null;
             }
 
-            if (_destroyPreviousInstance)
-            {
-                DestroyLastOpened();
-            }
-
-            _lastOpened = _target.Show(_streamingAssetFileName, _title);
-            LogResult("Show(fileName)", _streamingAssetFileName, _lastOpened);
-            return _lastOpened;
+            _lastOpened = presenter;
+            Debug.Log($"LengthyQuickTester: Show succeeded. source={_textAsset!.name}, instance={presenter.name}", this);
+            return presenter;
         }
 
-        public void DestroyLastOpened()
+        private void ConfigurePresenter(LengthyPresenter presenter)
+        {
+            if (_panelSettings != null && _styleSheet != null)
+            {
+                presenter.Configure(_panelSettings, _styleSheet);
+                return;
+            }
+
+            if (_panelSettings != null)
+            {
+                presenter.Configure(_panelSettings);
+            }
+
+            if (_styleSheet != null)
+            {
+                presenter.Configure(_styleSheet);
+            }
+        }
+
+        public void CloseLastOpened()
         {
             if (_lastOpened == null)
             {
@@ -68,95 +85,27 @@ namespace LengthyDebug
             var instance = _lastOpened;
             _lastOpened = null;
 
-            // 単一インスタンス運用では Lengthy 自体は残し、表示だけ閉じる。
-            if (_target != null && instance == _target)
+            if (instance != null)
             {
-                _target.Hide();
-                return;
-            }
-
-            if (Application.isPlaying)
-            {
-                Destroy(instance.gameObject);
-                return;
-            }
-
-            DestroyImmediate(instance.gameObject);
-        }
-
-        [ContextMenu("Lengthy/Test Show(TextAsset)")]
-        private void ContextShowFromTextAsset()
-        {
-            if (CanRunContextAction())
-            {
-                ShowFromTextAsset();
+                instance.Hide();
             }
         }
 
-        [ContextMenu("Lengthy/Test Show(fileName)")]
-        private void ContextShowFromFileName()
+        private bool ValidateSetup()
         {
-            if (CanRunContextAction())
+            if (_presenterPrefab == null)
             {
-                ShowFromFileName();
-            }
-        }
-
-        [ContextMenu("Lengthy/Destroy Last Opened")]
-        private void ContextDestroyLastOpened()
-        {
-            DestroyLastOpened();
-        }
-
-        private void Reset()
-        {
-            _target = GetComponent<Lengthy>();
-        }
-
-        private void OnValidate()
-        {
-            if (_target == null)
-            {
-                _target = GetComponent<Lengthy>();
-            }
-        }
-
-        private bool ValidateTarget()
-        {
-            if (_target == null)
-            {
-                _target = GetComponent<Lengthy>();
+                Debug.LogWarning("LengthyQuickTester: Assign Presenter Prefab.", this);
+                return false;
             }
 
-            if (_target != null)
+            if (_textAsset == null)
             {
-                return true;
+                Debug.LogWarning("LengthyQuickTester: Assign Text Asset.", this);
+                return false;
             }
 
-            Debug.LogWarning("LengthyQuickTester: Target に Lengthy コンポーネントを割り当ててください。", this);
-            return false;
-        }
-
-        private bool CanRunContextAction()
-        {
-            if (Application.isPlaying)
-            {
-                return true;
-            }
-
-            Debug.LogWarning("LengthyQuickTester: Play モード中に実行してください。", this);
-            return false;
-        }
-
-        private void LogResult(string label, string source, Lengthy instance)
-        {
-            if (instance == null)
-            {
-                Debug.LogWarning($"LengthyQuickTester: {label} に失敗しました。source={source}", this);
-                return;
-            }
-
-            Debug.Log($"LengthyQuickTester: {label} を実行しました。source={source}, instance={instance.name}", this);
+            return true;
         }
     }
 }
