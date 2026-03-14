@@ -7,16 +7,16 @@ namespace Lengthy
     /// </summary>
     public static class LengthyStyleClassNames
     {
-        internal const string Root = "lengthy-root";
-        internal const string SafeRoot = "lengthy-safe-root";
-        internal const string TopBar = "lengthy-top-bar";
-        internal const string TopBarWithTitle = "lengthy-top-bar--with-title";
-        internal const string Header = "lengthy-header";
-        internal const string HeaderHidden = "lengthy-header--hidden";
-        internal const string CloseButton = "lengthy-close-button";
-        internal const string CloseButtonInline = "lengthy-close-button--inline";
-        internal const string List = "lengthy-list";
-        internal const string Paragraph = "lengthy-paragraph";
+        public const string Root = "lengthy-root";
+        public const string SafeRoot = "lengthy-safe-root";
+        public const string TopBar = "lengthy-top-bar";
+        public const string TopBarWithTitle = "lengthy-top-bar--with-title";
+        public const string Header = "lengthy-header";
+        public const string HeaderHidden = "lengthy-header--hidden";
+        public const string CloseButton = "lengthy-close-button";
+        public const string CloseButtonInline = "lengthy-close-button--inline";
+        public const string List = "lengthy-list";
+        public const string Paragraph = "lengthy-paragraph";
     }
 }
 
