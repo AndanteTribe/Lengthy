@@ -9,7 +9,7 @@ namespace Lengthy
 {
     internal class TextAssetStream : Stream
     {
-        private NativeArray<byte> _data;
+        private readonly NativeArray<byte> _data;
         private long _position;
 
         /// <inheritdoc />
@@ -28,7 +28,14 @@ namespace Lengthy
         public override long Position
         {
             get => _position;
-            set => throw new NotSupportedException("TextAssetStream is read-only.");
+            set
+            {
+                if (value < 0 || value > Length)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "Position must be within the bounds of the stream.");
+                }
+                _position = value;
+            }
         }
 
         /// <inheritdoc />
@@ -87,11 +94,5 @@ namespace Lengthy
         /// <inheritdoc />
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException("TextAssetStream is read-only.");
 
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            _data.Dispose();
-            base.Dispose(disposing);
-        }
     }
 }
