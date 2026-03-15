@@ -44,7 +44,7 @@ namespace Lengthy
         /// <inheritdoc />
         public override void Flush()
         {
-            // Flush is typically implemented as an empty method to ensure full compatibility with other Stream types.        }
+            // Flush is typically implemented as an empty method to ensure full compatibility with other Stream types.
         }
 
         /// <inheritdoc />
@@ -76,12 +76,12 @@ namespace Lengthy
                 SeekOrigin.Begin => offset,
                 SeekOrigin.Current => _position + offset,
                 SeekOrigin.End => Length + offset,
-                _ => throw new ArgumentException()
+                _ => throw new ArgumentOutOfRangeException(nameof(origin), origin, "Invalid SeekOrigin value.")
             };
 
             if (newPos < 0 || newPos > Length)
             {
-                throw new IOException("Invalid seek");
+                throw new IOException($"Invalid seek to position {newPos}. Offset: {offset}, Origin: {origin}.");
             }
 
             _position = newPos;
