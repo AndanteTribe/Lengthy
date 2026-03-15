@@ -11,19 +11,18 @@ namespace Lengthy
     {
         private NativeArray<byte> _data;
         private long _position;
-        private bool _disposed;
 
         /// <inheritdoc />
-        public override bool CanRead => !_disposed;
+        public override bool CanRead => true;
 
         /// <inheritdoc />
-        public override bool CanSeek => false;
+        public override bool CanSeek => true;
 
         /// <inheritdoc />
         public override bool CanWrite => false;
 
         /// <inheritdoc />
-        public override long Length => throw new NotSupportedException("TextAssetStream is read-only.");
+        public override long Length => _data.Length;
 
         /// <inheritdoc />
         public override long Position
@@ -63,7 +62,24 @@ namespace Lengthy
         }
 
         /// <inheritdoc />
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException("Seek is not supported in this TextAssetStream.");
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            var newPos = origin switch
+            {
+                SeekOrigin.Begin => offset,
+                SeekOrigin.Current => _position + offset,
+                SeekOrigin.End => Length + offset,
+                _ => throw new ArgumentException()
+            };
+
+            if (newPos < 0 || newPos > Length)
+            {
+                throw new IOException("Invalid seek");
+            }
+
+            _position = newPos;
+            return _position;
+        }
 
         /// <inheritdoc />
         public override void SetLength(long value) => throw new NotSupportedException("TextAssetStream is read-only.");
