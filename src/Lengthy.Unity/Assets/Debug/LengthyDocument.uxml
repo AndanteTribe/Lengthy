@@ -1,0 +1,12 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Packages/jp.andantetribe.lengthy/DefaultLengthyUss.uss?fileID=7433441132597879392&amp;guid=83a2af4fae60545e2b065338e519814b&amp;type=3#DefaultLengthyUss"/>
+    <ui:VisualElement name="root" class="lengthy-root" style="flex-grow: 1;">
+        <ui:VisualElement name="LengthyWindow" class="lengthy-window" style="flex-grow: 1;">
+            <ui:VisualElement name="Header" class="lengthy-top-bar" style="flex-grow: 1;">
+                <ui:Label text="Label" name="TitleLable" class="lengthy-title"/>
+                <ui:Button text="X" name="CloseButton" emoji-fallback-support="true" class="lengthy-close-button"/>
+            </ui:VisualElement>
+            <ui:ListView class="lengthy-list"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
