@@ -13,7 +13,7 @@ namespace Lengthy
         private readonly StreamReader _reader;
         private readonly string[] _values = new string[1];
 
-        public LengthyView(TextAsset textAsset, Encoding? encoding = null, bool leaveOpen = false, string title = "") : this(new TextAssetStream(textAsset), encoding, leaveOpen, title)
+        public LengthyView(TextAsset textAsset, Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), encoding, true, title)
         {
         }
 
