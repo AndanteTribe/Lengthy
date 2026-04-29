@@ -1,0 +1,145 @@
+.lengthy-root {
+	flex-grow: 1;
+}
+
+.lengthy-window {
+	position: relative;
+	flex-grow: 1;
+	background-color: rgba(20, 24, 30, 0.95);
+	margin-left: 40px;
+	margin-right: 40px;
+	margin-top: 40px;
+	margin-bottom: 40px;
+    padding: 20px;
+	border-bottom-width: 1px;
+	border-top-width: 1px;
+	border-right-width: 1px;
+	border-left-width: 1px;
+	border-radius: 16px;
+	border-bottom-color: rgba(255, 255, 255, 0.2);
+	border-top-color: rgba(255, 255, 255, 0.2);
+	border-right-color: rgba(255, 255, 255, 0.2);
+	border-left-color: rgba(255, 255, 255, 0.2);
+}
+
+.lengthy-top-bar {
+	position: relative;
+	min-height: 50px;
+}
+
+.lengthy-top-bar--with-title {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom-width: 1px;
+	border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.lengthy-title {
+	color: rgb(240, 245, 255);
+	font-size: 32px;
+	-unity-font-style: bold;
+	flex-grow: 1;
+	text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.lengthy-title--hidden {
+	display: none;
+}
+
+.lengthy-close-button {
+	color: rgb(200, 200, 200);
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	height: 60px;
+	width: 60px;
+    font-size: 30px;
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: 30px;
+	border-width: 0;
+	transition: background-color 0.2s, color 0.2s;
+}
+
+.lengthy-close-button:hover {
+	color: rgb(255, 255, 255);
+	background-color: rgb(220, 60, 60);
+}
+
+.lengthy-close-button:active {
+	color: rgb(255, 255, 255);
+	background-color: rgb(180, 40, 40);
+}
+
+.lengthy-list {
+	flex-grow: 1;
+}
+
+.lengthy-list .unity-scroll-view__viewport,
+.lengthy-list .unity-content-viewport {
+	padding-right: 0;
+}
+
+.lengthy-list .unity-scroll-view__content-container,
+.lengthy-list .unity-collection-view__content-container {
+	padding-right: 0;
+}
+
+/* Scrollbar styling for UI Toolkit ListView/ScrollView internals */
+.lengthy-list .unity-scroll-view__vertical-scroller,
+.lengthy-list .unity-scroller--vertical {
+	width: 14px;
+	min-width: 10px;
+	right: 0;
+	margin-right: -10px;
+	background-color: transparent;
+}
+
+.lengthy-list .unity-scroller__low-button,
+.lengthy-list .unity-scroller__high-button {
+	display: none;
+}
+
+.lengthy-list .unity-scroller__slider {
+	background-color: transparent;
+    width: 100%;
+    min-width: 10px;
+    margin: 0;
+}
+
+.lengthy-list .unity-base-slider__tracker,
+.lengthy-list .unity-slider__tracker {
+	background-color: rgba(255, 255, 255, 0.05);
+	border-width: 0;
+	border-radius: 6px;
+    width: 12px;
+	margin-left: 2px;
+}
+
+.lengthy-list .unity-base-slider__dragger,
+.lengthy-list .unity-slider__dragger {
+	background-color: rgba(255, 255, 255, 0.3);
+	border-width: 0;
+	border-radius: 4px;
+    width: 8px;
+    left: 4px;
+	transition: background-color 0.2s;
+}
+
+.lengthy-list .unity-base-slider__dragger:hover,
+.lengthy-list .unity-slider__dragger:hover {
+	background-color: rgba(255, 255, 255, 0.5);
+}
+
+.lengthy-paragraph {
+	color: rgb(210, 220, 230);
+	font-size: 15px;
+	white-space: normal;
+	margin-bottom: 18px;
+	padding-left: 10px;
+	padding-right: 15px;
+	line-height: 22px;
+}
