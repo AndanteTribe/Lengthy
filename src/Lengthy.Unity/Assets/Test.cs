@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using Lengthy;
+using UnityEngine;
 using UnityEngine.UIElements;
+using System.Threading;
 
 namespace DefaultNamespace
 {
@@ -12,11 +14,13 @@ namespace DefaultNamespace
         [SerializeField]
         private TextAsset _textAsset;
 
-        private void Start()
+        private CancellationTokenSource _cancellationTokenSource;
+
+        private async void Start()
         {
-            var root = _uiDocument.rootVisualElement;
-            root.styleSheets.Add(_lengthyUss);
-            root.Add(new Lengthy.LengthyView(_textAsset, title: "利用規約など"));
+            _cancellationTokenSource = new CancellationTokenSource();
+            await LengthyViewLauncher.ShowLengthyViewAsync(_uiDocument.rootVisualElement, _lengthyUss, _textAsset,
+                _cancellationTokenSource.Token, title: "Hi");
         }
     }
 }
