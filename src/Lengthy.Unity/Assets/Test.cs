@@ -19,6 +19,8 @@ namespace DefaultNamespace
         private async void Start()
         {
             _cancellationTokenSource = new CancellationTokenSource();
+
+            // どこかでキャンセルするのを待つ
             await LengthyViewLauncher.ShowLengthyViewAsync(_uiDocument.rootVisualElement, _lengthyUss, _textAsset,
                 _cancellationTokenSource.Token, title: "Hi");
         }
