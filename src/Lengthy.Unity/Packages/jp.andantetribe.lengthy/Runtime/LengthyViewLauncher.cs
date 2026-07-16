@@ -17,7 +17,7 @@ namespace Lengthy
         /// <param name="lengthyUss"></param>
         /// <param name="textAsset"></param>
         /// <param name="title"></param>
-        public static async Awaitable ShowLengthyViewAsync(VisualElement root, StyleSheet lengthyUss, TextAsset textAsset, CancellationToken token, string title = "")
+        public static async Task ShowLengthyViewAsync(VisualElement root, StyleSheet lengthyUss, TextAsset textAsset, CancellationToken token, string title = "")
         {
             try
             {

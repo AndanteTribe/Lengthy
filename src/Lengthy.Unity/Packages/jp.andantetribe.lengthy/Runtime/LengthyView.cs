@@ -44,6 +44,10 @@ namespace Lengthy
 
                 var closeButton = new Button{ text = "X" };
                 closeButton.AddToClassList("lengthy-close-button");
+                closeButton.RegisterCallbackOnce<ClickEvent>(evt =>
+                {
+                    window.RemoveFromHierarchy();
+                });
                 topBar.Add(closeButton);
             }
 
