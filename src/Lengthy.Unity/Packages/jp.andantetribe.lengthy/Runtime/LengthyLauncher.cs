@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace Lengthy
 {
-    public static class LengthyViewLauncher
+    public static class LengthyLauncher
     {
         /// <summary>
         /// ビューの作成
@@ -18,7 +18,7 @@ namespace Lengthy
         /// <param name="lengthyUss"></param>
         /// <param name="textAsset"></param>
         /// <param name="title"></param>
-        public static async Task ShowLengthyViewAsync(TextAsset textAsset, string title = "")
+        public static async Task ShowAsync(TextAsset textAsset, string title = "")
         {
             var styleSheet = ExternalResources.LoadStyleSheet();
             var uiDocument = Object.FindFirstObjectByType<UIDocument>();

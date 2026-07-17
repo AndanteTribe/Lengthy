@@ -10,7 +10,7 @@ namespace DefaultNamespace
 
         private async void Start()
         {
-            await LengthyViewLauncher.ShowLengthyViewAsync(_textAsset, title: "ssss");
+            await LengthyLauncher.ShowAsync(_textAsset, title: "ssss");
         }
     }
 }
