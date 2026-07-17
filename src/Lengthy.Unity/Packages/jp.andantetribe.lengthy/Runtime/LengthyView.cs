@@ -13,6 +13,11 @@ namespace Lengthy
         private readonly StreamReader _reader;
         private readonly string[] _values = new string[1];
 
+        /// <summary>
+        /// 閉じるボタンが押された時に発火する
+        /// </summary>
+        public event Action? CloseButtonClicked;
+
         public LengthyView(TextAsset textAsset, Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), encoding, true, title)
         {
         }
@@ -47,6 +52,7 @@ namespace Lengthy
                 closeButton.RegisterCallbackOnce<ClickEvent>(evt =>
                 {
                     window.RemoveFromHierarchy();
+                    CloseButtonClicked?.Invoke();
                 });
                 topBar.Add(closeButton);
             }
