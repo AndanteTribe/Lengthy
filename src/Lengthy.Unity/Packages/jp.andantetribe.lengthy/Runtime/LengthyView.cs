@@ -16,16 +16,14 @@ namespace Lengthy
         private readonly StreamReader _reader;
         private readonly string[] _values = new string[1];
 
-        /// <summary>
-        /// 閉じるボタンが押された時に発火する
-        /// </summary>
-        public event Action? CloseButtonClicked;
+        private const string DefaultStyleSheetResourcePath = "DefaultLengthyUss";
+        private static StyleSheet? s_defaultStyleSheet;
 
-        public LengthyView(TextAsset textAsset, Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), encoding, true, title)
+        private LengthyView(TextAsset textAsset, TaskCompletionSource<Unit> taskCompletionSource,  Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), taskCompletionSource, encoding, true, title)
         {
         }
 
-        public LengthyView(Stream stream, Encoding? encoding = null, bool leaveOpen = false, string title = "")
+        private LengthyView(Stream stream, TaskCompletionSource<Unit> taskCompletionSource, Encoding? encoding = null, bool leaveOpen = false, string title = "")
         {
             if (!stream.CanSeek)
             {
@@ -52,10 +50,10 @@ namespace Lengthy
 
                 var closeButton = new Button{ text = "X" };
                 closeButton.AddToClassList("lengthy-close-button");
-                closeButton.RegisterCallbackOnce<ClickEvent>(evt =>
+                closeButton.RegisterCallbackOnce<ClickEvent, TaskCompletionSource<Unit>>(static (_, tcs) =>
                 {
-                    CloseButtonClicked?.Invoke();
-                });
+                    tcs.TrySetResult(Unit.Default);
+                }, taskCompletionSource);
                 topBar.Add(closeButton);
             }
 
@@ -88,17 +86,16 @@ namespace Lengthy
             });
         }
 
-        private const string DefaultStyleSheetResourcePath = "DefaultLengthyUss";
-        private static StyleSheet? s_defaultStyleSheet;
-
         /// <summary>
         /// StyleSheetを当てた上で、指定した要素の子として表示し、閉じられるまで待機する
         /// </summary>
+        /// <param name="textAsset">表示するテキスト</param>
         /// <param name="root">表示先の親要素</param>
         /// <param name="styleSheet">適用するStyleSheet。省略した場合はパッケージ同梱のデフォルトを使用する</param>
         /// <param name="additionalStyleSheets">styleSheetの上から重ねる追加のStyleSheet。不要ならnullでよい</param>
         /// <param name="token">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する</param>
-        public async Task ShowAsync(VisualElement root, StyleSheet? styleSheet = null, IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken token = default)
+        /// <param name="title">タイトル</param>
+        public static async Task ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null, IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken token = default, string title = "")
         {
             styleSheet ??= s_defaultStyleSheet ??= Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath)
                 ?? throw new InvalidOperationException($"Default StyleSheet not found at Resources/{DefaultStyleSheetResourcePath}.");
@@ -110,12 +107,11 @@ namespace Lengthy
                     root.styleSheets.Add(additional);
                 }
             }
-            root.Add(this);
 
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
-            var tcs = new TaskCompletionSource<bool>();
-            using var registration = cts.Token.Register(static state => ((TaskCompletionSource<bool>)state!).TrySetResult(true), tcs);
-            CloseButtonClicked += OnCloseButtonClicked;
+            var tcs = new TaskCompletionSource<Unit>();
+            var view = new LengthyView(textAsset, tcs, Encoding.UTF8, title);
+            using var registration = token.Register(static (ts) => ((TaskCompletionSource<Unit>)ts).TrySetCanceled(), tcs);
+            root.Add(view);
 
             try
             {
@@ -124,9 +120,7 @@ namespace Lengthy
             }
             finally
             {
-                // 非表示にするよ
-                CloseButtonClicked -= OnCloseButtonClicked;
-                root.Remove(this);
+                root.Remove(view);
                 root.styleSheets.Remove(styleSheet);
                 if (additionalStyleSheets != null)
                 {
@@ -136,8 +130,6 @@ namespace Lengthy
                     }
                 }
             }
-
-            void OnCloseButtonClicked() => cts.Cancel();
         }
     }
 }

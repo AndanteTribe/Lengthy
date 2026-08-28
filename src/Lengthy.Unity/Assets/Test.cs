@@ -15,10 +15,8 @@ namespace DefaultNamespace
         private async void Start()
         {
             var root = FindFirstObjectByType<UIDocument>().rootVisualElement;
-            var view = new LengthyView(_textAsset, title: "ssss");
-            await view.ShowAsync(root);
 
-            await view.ShowAsync(root, _styleSheet);
+            await LengthyView.ShowAsync(_textAsset, root, _styleSheet, title: "Test Title");
         }
     }
 }
