@@ -252,16 +252,65 @@ MonoBehaviour:
   m_GameObject: {fileID: 1252715412}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 37ec87666ec64f8d88c4225ab63e379c, type: 3}
+  m_Script: {fileID: 11500000, guid: a7331972e05c41668b8b8585f1a58294, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LengthyDebug.LengthyQuickTester
-  _presenterPrefab: {fileID: 4165129830745126670, guid: 16d67a0335ce4784a8e84c91091d75b1, type: 3}
-  _panelSettings: {fileID: 0}
-  _styleSheet: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Test
   _textAsset: {fileID: 4900000, guid: 4e10e8d9391604176a15e3755bee3368, type: 3}
-  _title: Lengthy Quick Test
-  _closeOnOpen: 1
-  _lastOpened: {fileID: 0}
+--- !u!1 &1259224472
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1259224474}
+  - component: {fileID: 1259224473}
+  m_Layer: 5
+  m_Name: UIDocument
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1259224473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259224472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 12ad673531c802b4081954158c435acf, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 0}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &1259224474
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259224472}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1563635142
 GameObject:
   m_ObjectHideFlags: 0
@@ -366,3 +415,4 @@ SceneRoots:
   - {fileID: 821683819}
   - {fileID: 1563635144}
   - {fileID: 1252715413}
+  - {fileID: 1259224474}
