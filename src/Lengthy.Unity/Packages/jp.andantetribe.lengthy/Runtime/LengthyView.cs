@@ -1,8 +1,11 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -51,7 +54,6 @@ namespace Lengthy
                 closeButton.AddToClassList("lengthy-close-button");
                 closeButton.RegisterCallbackOnce<ClickEvent>(evt =>
                 {
-                    window.RemoveFromHierarchy();
                     CloseButtonClicked?.Invoke();
                 });
                 topBar.Add(closeButton);
@@ -84,6 +86,58 @@ namespace Lengthy
                 var self = (LengthyView)evt.target;
                 self._reader.Dispose();
             });
+        }
+
+        private const string DefaultStyleSheetResourcePath = "DefaultLengthyUss";
+        private static StyleSheet? s_defaultStyleSheet;
+
+        /// <summary>
+        /// StyleSheetを当てた上で、指定した要素の子として表示し、閉じられるまで待機する
+        /// </summary>
+        /// <param name="root">表示先の親要素</param>
+        /// <param name="styleSheet">適用するStyleSheet。省略した場合はパッケージ同梱のデフォルトを使用する</param>
+        /// <param name="additionalStyleSheets">styleSheetの上から重ねる追加のStyleSheet。不要ならnullでよい</param>
+        /// <param name="token">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する</param>
+        public async Task ShowAsync(VisualElement root, StyleSheet? styleSheet = null, IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken token = default)
+        {
+            styleSheet ??= s_defaultStyleSheet ??= Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath)
+                ?? throw new InvalidOperationException($"Default StyleSheet not found at Resources/{DefaultStyleSheetResourcePath}.");
+            root.styleSheets.Add(styleSheet);
+            if (additionalStyleSheets != null)
+            {
+                foreach (var additional in additionalStyleSheets)
+                {
+                    root.styleSheets.Add(additional);
+                }
+            }
+            root.Add(this);
+
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(token);
+            var tcs = new TaskCompletionSource<bool>();
+            using var registration = cts.Token.Register(static state => ((TaskCompletionSource<bool>)state!).TrySetResult(true), tcs);
+            CloseButtonClicked += OnCloseButtonClicked;
+
+            try
+            {
+                // 閉じるボタン、または外部からのキャンセルを待つ
+                await tcs.Task;
+            }
+            finally
+            {
+                // 非表示にするよ
+                CloseButtonClicked -= OnCloseButtonClicked;
+                root.Remove(this);
+                root.styleSheets.Remove(styleSheet);
+                if (additionalStyleSheets != null)
+                {
+                    foreach (var additional in additionalStyleSheets)
+                    {
+                        root.styleSheets.Remove(additional);
+                    }
+                }
+            }
+
+            void OnCloseButtonClicked() => cts.Cancel();
         }
     }
 }
