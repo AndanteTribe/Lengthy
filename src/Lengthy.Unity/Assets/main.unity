@@ -256,6 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.Test
   _textAsset: {fileID: 4900000, guid: 4e10e8d9391604176a15e3755bee3368, type: 3}
+  _styleSheet: {fileID: 0}
 --- !u!1 &1259224472
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,7 +1,9 @@
 {
     "name": "Lengthy",
     "rootNamespace": "Lengthy",
-    "references": [],
+    "references": [
+        "GUID:cf8dc3a2a38e49f9b70e9c5b93453e0c"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
