@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Lengthy.Internal;
 
 namespace Lengthy
 {
@@ -19,11 +20,11 @@ namespace Lengthy
         private const string DefaultStyleSheetResourcePath = "DefaultLengthyUss";
         private static StyleSheet? s_defaultStyleSheet;
 
-        private LengthyView(TextAsset textAsset, TaskCompletionSource<Unit> taskCompletionSource,  Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), taskCompletionSource, encoding, true, title)
+        private LengthyView(TextAsset textAsset, LengthyValueTaskSource valueTaskSource,  Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), valueTaskSource, encoding, true, title)
         {
         }
 
-        private LengthyView(Stream stream, TaskCompletionSource<Unit> taskCompletionSource, Encoding? encoding = null, bool leaveOpen = false, string title = "")
+        private LengthyView(Stream stream, LengthyValueTaskSource valueTaskSource, Encoding? encoding = null, bool leaveOpen = false, string title = "")
         {
             if (!stream.CanSeek)
             {
@@ -50,10 +51,10 @@ namespace Lengthy
 
                 var closeButton = new Button{ text = "X" };
                 closeButton.AddToClassList("lengthy-close-button");
-                closeButton.RegisterCallbackOnce<ClickEvent, TaskCompletionSource<Unit>>(static (_, tcs) =>
+                closeButton.RegisterCallbackOnce<ClickEvent, LengthyValueTaskSource>(static (_, vts) =>
                 {
-                    tcs.TrySetResult(Unit.Default);
-                }, taskCompletionSource);
+                    vts.SetResult();
+                }, valueTaskSource);
                 topBar.Add(closeButton);
             }
 
@@ -74,7 +75,8 @@ namespace Lengthy
                     ((Label)element).text = _values[index];
                 },
                 itemsSource = _values,
-                virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight
+                virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight,
+                selectionType = SelectionType.None,
             };
             listView.AddToClassList("lengthy-list");
             window.Add(listView);
@@ -93,12 +95,14 @@ namespace Lengthy
         /// <param name="root">表示先の親要素</param>
         /// <param name="styleSheet">適用するStyleSheet。省略した場合はパッケージ同梱のデフォルトを使用する</param>
         /// <param name="additionalStyleSheets">styleSheetの上から重ねる追加のStyleSheet。不要ならnullでよい</param>
-        /// <param name="token">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する</param>
+        /// <param name="cancellationToken">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する</param>
         /// <param name="title">タイトル</param>
-        public static async Task ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null, IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken token = default, string title = "")
+        public static async ValueTask ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null,
+            IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken cancellationToken = default,
+            string title = "")
         {
             styleSheet ??= s_defaultStyleSheet ??= Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath)
-                ?? throw new InvalidOperationException($"Default StyleSheet not found at Resources/{DefaultStyleSheetResourcePath}.");
+                        ?? throw new InvalidOperationException($"Default StyleSheet not found at Resources/{DefaultStyleSheetResourcePath}.");
             root.styleSheets.Add(styleSheet);
             if (additionalStyleSheets != null)
             {
@@ -108,15 +112,19 @@ namespace Lengthy
                 }
             }
 
-            var tcs = new TaskCompletionSource<Unit>();
-            var view = new LengthyView(textAsset, tcs, Encoding.UTF8, title);
-            using var registration = token.Register(static (ts) => ((TaskCompletionSource<Unit>)ts).TrySetCanceled(), tcs);
+            var source = LengthyValueTaskSource.Create();
+            var view = new LengthyView(textAsset, source, Encoding.UTF8, title);
+            await using var registration = cancellationToken.UnsafeRegister(static vts =>
+            {
+                var tcs = (LengthyValueTaskSource)vts!;
+                tcs.SetCancel();
+            }, source);
             root.Add(view);
 
             try
             {
                 // 閉じるボタン、または外部からのキャンセルを待つ
-                await tcs.Task;
+                await new ValueTask(source, source.Version);
             }
             finally
             {
