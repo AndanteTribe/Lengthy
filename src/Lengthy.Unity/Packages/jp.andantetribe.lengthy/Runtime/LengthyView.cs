@@ -6,9 +6,9 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lengthy.Internal;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Lengthy.Internal;
 
 namespace Lengthy
 {
@@ -114,7 +114,7 @@ namespace Lengthy
 
             var source = LengthyValueTaskSource.Create();
             var view = new LengthyView(textAsset, source, Encoding.UTF8, title);
-            await using var registration = cancellationToken.UnsafeRegister(static vts =>
+            using var registration = cancellationToken.UnsafeRegister(static vts =>
             {
                 var tcs = (LengthyValueTaskSource)vts!;
                 tcs.SetCancel();
