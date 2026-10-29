@@ -20,7 +20,7 @@ namespace Lengthy
         private const string DefaultStyleSheetResourcePath = "DefaultLengthyUss";
         private static StyleSheet? s_defaultStyleSheet;
 
-        private LengthyView(TextAsset textAsset, LengthyValueTaskSource valueTaskSource,  Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), valueTaskSource, encoding, true, title)
+        private LengthyView(TextAsset textAsset, LengthyValueTaskSource valueTaskSource, Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), valueTaskSource, encoding, true, title)
         {
         }
 
@@ -49,7 +49,7 @@ namespace Lengthy
                 titleLabel.AddToClassList("lengthy-title");
                 topBar.Add(titleLabel);
 
-                var closeButton = new Button{ text = "X" };
+                var closeButton = new Button { text = "X" };
                 closeButton.AddToClassList("lengthy-close-button");
                 closeButton.RegisterCallbackOnce<ClickEvent, LengthyValueTaskSource>(static (_, vts) =>
                 {
@@ -102,8 +102,7 @@ namespace Lengthy
             IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken cancellationToken = default,
             string title = "")
         {
-            styleSheet ??= s_defaultStyleSheet ??= Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath)
-                        ?? throw new InvalidOperationException($"Default StyleSheet not found at Resources/{DefaultStyleSheetResourcePath}.");
+            styleSheet ??= s_defaultStyleSheet ??= Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath);
             root.styleSheets.Add(styleSheet);
             if (additionalStyleSheets != null)
             {
@@ -113,8 +112,7 @@ namespace Lengthy
                 }
             }
 
-            var source = LengthyValueTaskSource.Create();
-            source.RegisterCancellation(cancellationToken);
+            var source = LengthyValueTaskSource.Create(cancellationToken);
             var view = new LengthyView(textAsset, source, Encoding.UTF8, title);
             root.Add(view);
 

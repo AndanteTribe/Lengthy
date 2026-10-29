@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Diagnostics;
@@ -17,30 +17,34 @@ namespace Lengthy.Internal
             RunContinuationsAsynchronously = false
         };
 
-        private bool _completed;
-
         private CancellationTokenRegistration _registration;
 
-        public short Version => _core.Version;
+        public short Version { get; private set; }
 
         private LengthyValueTaskSource()
         {
         }
 
-        public static LengthyValueTaskSource Create()
+        public static LengthyValueTaskSource Create(CancellationToken cancellationToken)
         {
+            LengthyValueTaskSource instance;
             if (s_head is null)
             {
-                return new LengthyValueTaskSource();
+                instance = new LengthyValueTaskSource();
+                instance.Version = instance._core.Version;
+                instance.RegisterCancellation(cancellationToken);
+                return instance;
             }
 
-            var instance = s_head;
+            instance = s_head;
             s_head = instance._next;
             instance._next = null;
+            instance.Version = instance._core.Version;
+            instance.RegisterCancellation(cancellationToken);
             return instance;
         }
 
-        public void RegisterCancellation(CancellationToken cancellationToken)
+        private void RegisterCancellation(CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -57,23 +61,19 @@ namespace Lengthy.Internal
 
         public void SetResult()
         {
-            if (_completed)
+            if (_core.Version != Version)
             {
                 return;
             }
-
-            _completed = true;
             _core.SetResult(Unit.Default);
         }
 
         private void SetCancel(CancellationToken cancellationToken)
         {
-            if (_completed)
+            if (_core.Version != Version)
             {
                 return;
             }
-
-            _completed = true;
             _core.SetException(new OperationCanceledException(cancellationToken));
         }
 
@@ -100,7 +100,6 @@ namespace Lengthy.Internal
             _registration.Dispose();
             _registration = default;
             _core.Reset();
-            _completed = false;
             _next = s_head;
             s_head = this;
         }
