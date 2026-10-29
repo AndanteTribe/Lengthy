@@ -115,9 +115,9 @@ namespace Lengthy
             root.styleSheets.Add(styleSheet);
             if (additionalStyleSheets != null)
             {
-                foreach (var additional in additionalStyleSheets)
+                for (var i = 0; i < additionalStyleSheets.Count; i++)
                 {
-                    root.styleSheets.Add(additional);
+                    root.styleSheets.Add(additionalStyleSheets[i]);
                 }
             }
 
@@ -141,9 +141,9 @@ namespace Lengthy
                 root.styleSheets.Remove(styleSheet);
                 if (additionalStyleSheets != null)
                 {
-                    foreach (var additional in additionalStyleSheets)
+                    for (var i = 0; i < additionalStyleSheets.Count; i++)
                     {
-                        root.styleSheets.Remove(additional);
+                        root.styleSheets.Remove(additionalStyleSheets[i]);
                     }
                 }
             }
