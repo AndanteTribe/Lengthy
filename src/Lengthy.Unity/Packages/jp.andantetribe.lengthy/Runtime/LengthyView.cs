@@ -102,7 +102,16 @@ namespace Lengthy
             IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken cancellationToken = default,
             string title = "")
         {
-            styleSheet ??= s_defaultStyleSheet ??= Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath);
+            if (s_defaultStyleSheet is null)
+            {
+                s_defaultStyleSheet = Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath);
+            }
+
+            if (styleSheet is null)
+            {
+                styleSheet = s_defaultStyleSheet;
+            }
+
             root.styleSheets.Add(styleSheet);
             if (additionalStyleSheets != null)
             {
@@ -116,6 +125,12 @@ namespace Lengthy
             var view = new LengthyView(textAsset, source, Encoding.UTF8, title);
             root.Add(view);
 
+            await ShowCoreAsync(source, view, root, styleSheet, additionalStyleSheets);
+        }
+
+        private static async ValueTask ShowCoreAsync(LengthyValueTaskSource source, LengthyView view, VisualElement root,
+            StyleSheet? styleSheet = null, IReadOnlyList<StyleSheet>? additionalStyleSheets = null)
+        {
             try
             {
                 await new ValueTask(source, source.Version);
@@ -134,4 +149,3 @@ namespace Lengthy
             }
         }
     }
-}
