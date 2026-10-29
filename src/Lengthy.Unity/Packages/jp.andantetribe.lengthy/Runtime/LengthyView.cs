@@ -98,7 +98,7 @@ namespace Lengthy
         /// <param name="additionalStyleSheets">styleSheetの上から重ねる追加のStyleSheet。不要ならnullでよい</param>
         /// <param name="cancellationToken">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する。キャンセルはメインスレッドから行うこと (CancelAfter などタイマーでキャンセルされるトークンは非対応)</param>
         /// <param name="title">タイトル</param>
-        public static async ValueTask ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null,
+        public static ValueTask ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null,
             IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken cancellationToken = default,
             string title = "")
         {
@@ -125,7 +125,7 @@ namespace Lengthy
             var view = new LengthyView(textAsset, source, Encoding.UTF8, title);
             root.Add(view);
 
-            await ShowCoreAsync(source, view, root, styleSheet, additionalStyleSheets);
+            return ShowCoreAsync(source, view, root, styleSheet, additionalStyleSheets);
         }
 
         private static async ValueTask ShowCoreAsync(LengthyValueTaskSource source, LengthyView view, VisualElement root,
