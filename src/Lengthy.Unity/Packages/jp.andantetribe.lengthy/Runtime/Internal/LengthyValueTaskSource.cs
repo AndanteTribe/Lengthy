@@ -17,7 +17,9 @@ namespace Lengthy.Internal
             RunContinuationsAsynchronously = false
         };
 
-        public CancellationTokenRegistration Registration { get; set; }
+        private bool _completed;
+
+        private CancellationTokenRegistration _registration;
 
         public short Version => _core.Version;
 
@@ -38,9 +40,42 @@ namespace Lengthy.Internal
             return instance;
         }
 
-        public void SetResult() => _core.SetResult(Unit.Default);
+        public void RegisterCancellation(CancellationToken cancellationToken)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                SetCancel(cancellationToken);
+                return;
+            }
 
-        public void SetCancel() => _core.SetException(new OperationCanceledException(Registration.Token));
+            _registration = cancellationToken.UnsafeRegister(static state =>
+            {
+                var self = (LengthyValueTaskSource)state!;
+                self.SetCancel(self._registration.Token);
+            }, this);
+        }
+
+        public void SetResult()
+        {
+            if (_completed)
+            {
+                return;
+            }
+
+            _completed = true;
+            _core.SetResult(Unit.Default);
+        }
+
+        private void SetCancel(CancellationToken cancellationToken)
+        {
+            if (_completed)
+            {
+                return;
+            }
+
+            _completed = true;
+            _core.SetException(new OperationCanceledException(cancellationToken));
+        }
 
         [DebuggerNonUserCode]
         void IValueTaskSource.GetResult(short token)
@@ -62,9 +97,10 @@ namespace Lengthy.Internal
 
         private void Reset()
         {
-            Registration.Dispose();
-            Registration = default;
+            _registration.Dispose();
+            _registration = default;
             _core.Reset();
+            _completed = false;
             _next = s_head;
             s_head = this;
         }

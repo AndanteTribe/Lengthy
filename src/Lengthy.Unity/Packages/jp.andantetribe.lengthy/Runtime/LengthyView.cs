@@ -89,13 +89,14 @@ namespace Lengthy
         }
 
         /// <summary>
+        ///  渡されたテキストの内容をUIで表示する
         /// StyleSheetを当てた上で、指定した要素の子として表示し、閉じられるまで待機する
         /// </summary>
         /// <param name="textAsset">表示するテキスト</param>
         /// <param name="root">表示先の親要素</param>
         /// <param name="styleSheet">適用するStyleSheet。省略した場合はパッケージ同梱のデフォルトを使用する</param>
         /// <param name="additionalStyleSheets">styleSheetの上から重ねる追加のStyleSheet。不要ならnullでよい</param>
-        /// <param name="cancellationToken">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する</param>
+        /// <param name="cancellationToken">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する。キャンセルはメインスレッドから行うこと (CancelAfter などタイマーでキャンセルされるトークンは非対応)</param>
         /// <param name="title">タイトル</param>
         public static async ValueTask ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null,
             IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken cancellationToken = default,
@@ -113,17 +114,12 @@ namespace Lengthy
             }
 
             var source = LengthyValueTaskSource.Create();
+            source.RegisterCancellation(cancellationToken);
             var view = new LengthyView(textAsset, source, Encoding.UTF8, title);
-            using var registration = cancellationToken.UnsafeRegister(static vts =>
-            {
-                var tcs = (LengthyValueTaskSource)vts!;
-                tcs.SetCancel();
-            }, source);
             root.Add(view);
 
             try
             {
-                // 閉じるボタン、または外部からのキャンセルを待つ
                 await new ValueTask(source, source.Version);
             }
             finally
