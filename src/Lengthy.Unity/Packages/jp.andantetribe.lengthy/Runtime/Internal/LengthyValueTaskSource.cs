@@ -27,36 +27,27 @@ namespace Lengthy.Internal
 
         public static LengthyValueTaskSource Create(CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             LengthyValueTaskSource instance;
+
             if (s_head is null)
             {
                 instance = new LengthyValueTaskSource();
-                instance.Version = instance._core.Version;
-                instance.RegisterCancellation(cancellationToken);
-                return instance;
             }
-
-            instance = s_head;
-            s_head = instance._next;
-            instance._next = null;
-            instance.Version = instance._core.Version;
-            instance.RegisterCancellation(cancellationToken);
-            return instance;
-        }
-
-        private void RegisterCancellation(CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested)
+            else
             {
-                SetCancel(cancellationToken);
-                return;
+                instance = s_head;
+                s_head = instance._next;
+                instance._next = null;
             }
 
-            _registration = cancellationToken.UnsafeRegister(static state =>
+            instance.Version = instance._core.Version;
+            instance._registration = cancellationToken.UnsafeRegister(static state =>
             {
                 var self = (LengthyValueTaskSource)state!;
                 self.SetCancel(self._registration.Token);
-            }, this);
+            }, instance);
+            return instance;
         }
 
         public void SetResult()
