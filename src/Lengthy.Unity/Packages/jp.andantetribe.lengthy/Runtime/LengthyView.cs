@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lengthy.Internal;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,11 +20,11 @@ namespace Lengthy
         private const string DefaultStyleSheetResourcePath = "DefaultLengthyUss";
         private static StyleSheet? s_defaultStyleSheet;
 
-        private LengthyView(TextAsset textAsset, TaskCompletionSource<Unit> taskCompletionSource,  Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), taskCompletionSource, encoding, true, title)
+        private LengthyView(TextAsset textAsset, LengthyValueTaskSource valueTaskSource, Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), valueTaskSource, encoding, true, title)
         {
         }
 
-        private LengthyView(Stream stream, TaskCompletionSource<Unit> taskCompletionSource, Encoding? encoding = null, bool leaveOpen = false, string title = "")
+        private LengthyView(Stream stream, LengthyValueTaskSource valueTaskSource, Encoding? encoding = null, bool leaveOpen = false, string title = "")
         {
             if (!stream.CanSeek)
             {
@@ -48,12 +49,12 @@ namespace Lengthy
                 titleLabel.AddToClassList("lengthy-title");
                 topBar.Add(titleLabel);
 
-                var closeButton = new Button{ text = "X" };
+                var closeButton = new Button { text = "X" };
                 closeButton.AddToClassList("lengthy-close-button");
-                closeButton.RegisterCallbackOnce<ClickEvent, TaskCompletionSource<Unit>>(static (_, tcs) =>
+                closeButton.RegisterCallbackOnce<ClickEvent, LengthyValueTaskSource>(static (_, vts) =>
                 {
-                    tcs.TrySetResult(Unit.Default);
-                }, taskCompletionSource);
+                    vts.SetResult();
+                }, valueTaskSource);
                 topBar.Add(closeButton);
             }
 
@@ -74,7 +75,8 @@ namespace Lengthy
                     ((Label)element).text = _values[index];
                 },
                 itemsSource = _values,
-                virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight
+                virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight,
+                selectionType = SelectionType.None,
             };
             listView.AddToClassList("lengthy-list");
             window.Add(listView);
@@ -87,36 +89,51 @@ namespace Lengthy
         }
 
         /// <summary>
+        ///  渡されたテキストの内容をUIで表示する
         /// StyleSheetを当てた上で、指定した要素の子として表示し、閉じられるまで待機する
         /// </summary>
         /// <param name="textAsset">表示するテキスト</param>
         /// <param name="root">表示先の親要素</param>
         /// <param name="styleSheet">適用するStyleSheet。省略した場合はパッケージ同梱のデフォルトを使用する</param>
         /// <param name="additionalStyleSheets">styleSheetの上から重ねる追加のStyleSheet。不要ならnullでよい</param>
-        /// <param name="token">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する</param>
+        /// <param name="cancellationToken">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する。キャンセルはメインスレッドから行うこと (CancelAfter などタイマーでキャンセルされるトークンは非対応)</param>
         /// <param name="title">タイトル</param>
-        public static async Task ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null, IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken token = default, string title = "")
+        public static ValueTask ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null,
+            IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken cancellationToken = default,
+            string title = "")
         {
-            styleSheet ??= s_defaultStyleSheet ??= Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath)
-                ?? throw new InvalidOperationException($"Default StyleSheet not found at Resources/{DefaultStyleSheetResourcePath}.");
+            if (s_defaultStyleSheet is null)
+            {
+                s_defaultStyleSheet = Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath);
+            }
+
+            if (styleSheet is null)
+            {
+                styleSheet = s_defaultStyleSheet;
+            }
+
             root.styleSheets.Add(styleSheet);
             if (additionalStyleSheets != null)
             {
-                foreach (var additional in additionalStyleSheets)
+                for (var i = 0; i < additionalStyleSheets.Count; i++)
                 {
-                    root.styleSheets.Add(additional);
+                    root.styleSheets.Add(additionalStyleSheets[i]);
                 }
             }
 
-            var tcs = new TaskCompletionSource<Unit>();
-            var view = new LengthyView(textAsset, tcs, Encoding.UTF8, title);
-            using var registration = token.Register(static (ts) => ((TaskCompletionSource<Unit>)ts).TrySetCanceled(), tcs);
+            var source = LengthyValueTaskSource.Create(cancellationToken);
+            var view = new LengthyView(textAsset, source, Encoding.UTF8, title);
             root.Add(view);
 
+            return ShowCoreAsync(source, view, root, styleSheet, additionalStyleSheets);
+        }
+
+        private static async ValueTask ShowCoreAsync(LengthyValueTaskSource source, LengthyView view, VisualElement root,
+            StyleSheet? styleSheet = null, IReadOnlyList<StyleSheet>? additionalStyleSheets = null)
+        {
             try
             {
-                // 閉じるボタン、または外部からのキャンセルを待つ
-                await tcs.Task;
+                await new ValueTask(source, source.Version);
             }
             finally
             {
@@ -124,9 +141,9 @@ namespace Lengthy
                 root.styleSheets.Remove(styleSheet);
                 if (additionalStyleSheets != null)
                 {
-                    foreach (var additional in additionalStyleSheets)
+                    for (var i = 0; i < additionalStyleSheets.Count; i++)
                     {
-                        root.styleSheets.Remove(additional);
+                        root.styleSheets.Remove(additionalStyleSheets[i]);
                     }
                 }
             }
