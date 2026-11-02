@@ -9,6 +9,8 @@
 ## 概要
 **Lengthy** は、Unity で長文を表示するための UI Toolkit ライブラリです。
 
+<img width="1600" height="900" alt="lengthy-license" src="https://github.com/user-attachments/assets/3383467a-7567-40cf-95f8-9504fb0f44be" />
+
 `TextAsset`・`string`・段落ごとの文字列配列を表示し、閉じられるまで `await` で待機できます。既存の Visual Tree に `LengthyView` を直接追加することもできます。
 
 - 動的な行高に対応する `ListView` の仮想化によるスクロール表示。
