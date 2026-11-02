@@ -1,9 +1,6 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lengthy.Internal;
@@ -14,23 +11,33 @@ namespace Lengthy
 {
     public class LengthyView : VisualElement
     {
-        private readonly StreamReader _reader;
-        private readonly string[] _values = new string[1];
-
         private const string DefaultStyleSheetResourcePath = "DefaultLengthyUss";
-        private static StyleSheet? s_defaultStyleSheet;
 
-        private LengthyView(TextAsset textAsset, LengthyValueTaskSource valueTaskSource, Encoding? encoding = null, string title = "") : this(new TextAssetStream(textAsset), valueTaskSource, encoding, true, title)
+        public LengthyView(TextAsset textAsset, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
+            : this(new []{ textAsset.text }, title, alwaysIncludeDefaultStyleSheet, null)
         {
         }
 
-        private LengthyView(Stream stream, LengthyValueTaskSource valueTaskSource, Encoding? encoding = null, bool leaveOpen = false, string title = "")
+        public LengthyView(string value, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
+            : this(new []{ value }, title, alwaysIncludeDefaultStyleSheet, null)
         {
-            if (!stream.CanSeek)
+        }
+
+        public LengthyView(string[] values, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
+            :this(values, title, alwaysIncludeDefaultStyleSheet, null)
+        {
+        }
+
+        internal LengthyView(string[] values, string title, bool alwaysIncludeDefaultStyleSheet, LengthyValueTaskSource? valueTaskSource)
+        {
+            RegisterCallbackOnce<AttachToPanelEvent, bool>(static (evt, alwaysIncludeDefaultStyleSheet) =>
             {
-                throw new ArgumentException("The provided Stream must be based on a seekable stream.", nameof(stream));
-            }
-            _reader = new StreamReader(stream, encoding ?? Encoding.UTF8, false, 1024, leaveOpen);
+                var parent = (evt.currentTarget as VisualElement)?.parent;
+                if (parent != null && (alwaysIncludeDefaultStyleSheet || parent.styleSheets.count == 0))
+                {
+                    parent.styleSheets.Insert(0, Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath));
+                }
+            }, alwaysIncludeDefaultStyleSheet);
 
             AddToClassList("lengthy-root");
 
@@ -48,15 +55,25 @@ namespace Lengthy
                 var titleLabel = new Label(title);
                 titleLabel.AddToClassList("lengthy-title");
                 topBar.Add(titleLabel);
+            }
 
-                var closeButton = new Button { text = "X" };
-                closeButton.AddToClassList("lengthy-close-button");
+            var closeButton = new Button { text = "X" };
+            closeButton.AddToClassList("lengthy-close-button");
+            if (valueTaskSource != null)
+            {
                 closeButton.RegisterCallbackOnce<ClickEvent, LengthyValueTaskSource>(static (_, vts) =>
                 {
                     vts.SetResult();
                 }, valueTaskSource);
-                topBar.Add(closeButton);
             }
+            else
+            {
+                closeButton.RegisterCallback<ClickEvent, LengthyView>(static (_, view) =>
+                {
+                    view.RemoveFromHierarchy();
+                }, this);
+            }
+            topBar.Add(closeButton);
 
             var listView = new ListView
             {
@@ -66,87 +83,75 @@ namespace Lengthy
                     label.AddToClassList("lengthy-paragraph");
                     return label;
                 },
-                bindItem = (element, index) =>
-                {
-                    if (!_reader.EndOfStream)
-                    {
-                        _values[index] = _reader.ReadToEnd();
-                    }
-                    ((Label)element).text = _values[index];
-                },
-                itemsSource = _values,
+                itemsSource = values,
                 virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight,
                 selectionType = SelectionType.None,
             };
             listView.AddToClassList("lengthy-list");
             window.Add(listView);
+            BindItems(listView);
 
-            RegisterCallback<DetachFromPanelEvent>(static evt =>
+            static void BindItems(ListView listView)
             {
-                var self = (LengthyView)evt.target;
-                self._reader.Dispose();
-            });
+                var entry = BindItemDelegatePool.Rent((string[])listView.itemsSource);
+                listView.bindItem = entry.Callback;
+                listView.RegisterCallbackOnce<DetachFromPanelEvent, (ListView List, BindItemDelegatePool.Entry Entry)>(static (_, state) =>
+                {
+                    var (listView, entry) = state;
+                    listView.bindItem = null;
+                    BindItemDelegatePool.Return(entry);
+                    listView.RegisterCallbackOnce<AttachToPanelEvent, ListView>(static (_, list) => BindItems(list), listView);
+                }, (listView, entry));
+            }
         }
 
         /// <summary>
-        ///  渡されたテキストの内容をUIで表示する
-        /// StyleSheetを当てた上で、指定した要素の子として表示し、閉じられるまで待機する
+        /// 渡されたテキストの内容をUIで表示する.
+        /// 閉じるかキャンセルされると生成したオブジェクトを破棄する.
         /// </summary>
-        /// <param name="textAsset">表示するテキスト</param>
-        /// <param name="root">表示先の親要素</param>
-        /// <param name="styleSheet">適用するStyleSheet。省略した場合はパッケージ同梱のデフォルトを使用する</param>
-        /// <param name="additionalStyleSheets">styleSheetの上から重ねる追加のStyleSheet。不要ならnullでよい</param>
-        /// <param name="cancellationToken">キャンセルすると非表示になる。閉じるボタン押下時にもこのTaskは完了する。キャンセルはメインスレッドから行うこと (CancelAfter などタイマーでキャンセルされるトークンは非対応)</param>
-        /// <param name="title">タイトル</param>
-        public static ValueTask ShowAsync(TextAsset textAsset, VisualElement root, StyleSheet? styleSheet = null,
-            IReadOnlyList<StyleSheet>? additionalStyleSheets = null, CancellationToken cancellationToken = default,
-            string title = "")
+        /// <param name="textAsset">表示するテキスト.</param>
+        /// <param name="title">タイトル.</param>
+        /// <param name="cancellationToken">キャンセルすると非表示になる. 閉じるボタン押下時にもこのTaskは完了する. キャンセルはメインスレッドから行うこと.</param>
+        public static ValueTask ShowAsync(TextAsset textAsset, string title = "", CancellationToken cancellationToken = default)
         {
-            if (s_defaultStyleSheet is null)
+            if (textAsset == null)
             {
-                s_defaultStyleSheet = Resources.Load<StyleSheet>(DefaultStyleSheetResourcePath);
+                throw new ArgumentNullException(nameof(textAsset));
             }
-
-            if (styleSheet is null)
-            {
-                styleSheet = s_defaultStyleSheet;
-            }
-
-            root.styleSheets.Add(styleSheet);
-            if (additionalStyleSheets != null)
-            {
-                for (var i = 0; i < additionalStyleSheets.Count; i++)
-                {
-                    root.styleSheets.Add(additionalStyleSheets[i]);
-                }
-            }
-
-            var source = LengthyValueTaskSource.Create(cancellationToken);
-            var view = new LengthyView(textAsset, source, Encoding.UTF8, title);
-            root.Add(view);
-
-            return ShowCoreAsync(source, view, root, styleSheet, additionalStyleSheets);
+            return ShowAsync(textAsset.text, title, cancellationToken);
         }
 
-        private static async ValueTask ShowCoreAsync(LengthyValueTaskSource source, LengthyView view, VisualElement root,
-            StyleSheet? styleSheet = null, IReadOnlyList<StyleSheet>? additionalStyleSheets = null)
+        /// <summary>
+        /// 渡されたテキストの内容をUIで表示する.
+        /// 閉じるかキャンセルされると生成したオブジェクトを破棄する.
+        /// </summary>
+        /// <param name="value">表示するテキスト.</param>
+        /// <param name="title">タイトル.</param>
+        /// <param name="cancellationToken">キャンセルすると非表示になる. 閉じるボタン押下時にもこのTaskは完了する. キャンセルはメインスレッドから行うこと.</param>
+        public static ValueTask ShowAsync(string value, string title = "", CancellationToken cancellationToken = default)
         {
-            try
+            if (value == null)
             {
-                await new ValueTask(source, source.Version);
+                throw new ArgumentNullException(nameof(value));
             }
-            finally
+            return ShowAsync(new[] { value }, title, cancellationToken);
+        }
+
+        /// <summary>
+        /// 渡されたテキストの内容をUIで表示する.
+        /// 閉じるかキャンセルされると生成したオブジェクトを破棄する.
+        /// </summary>
+        /// <param name="values">段落ごとに分割されたテキスト.</param>
+        /// <param name="title">タイトル.</param>
+        /// <param name="cancellationToken">キャンセルすると非表示になる. 閉じるボタン押下時にもこのTaskは完了する. キャンセルはメインスレッドから行うこと.</param>
+        public static ValueTask ShowAsync(string[] values, string title = "", CancellationToken cancellationToken = default)
+        {
+            if (values == null)
             {
-                root.Remove(view);
-                root.styleSheets.Remove(styleSheet);
-                if (additionalStyleSheets != null)
-                {
-                    for (var i = 0; i < additionalStyleSheets.Count; i++)
-                    {
-                        root.styleSheets.Remove(additionalStyleSheets[i]);
-                    }
-                }
+                throw new ArgumentNullException(nameof(values));
             }
+            var source = LengthyValueTaskSource.Create(title, values, cancellationToken);
+            return new ValueTask(source, source.Version);
         }
     }
 }
