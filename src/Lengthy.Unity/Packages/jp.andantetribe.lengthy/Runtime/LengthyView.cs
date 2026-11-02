@@ -9,20 +9,41 @@ using UnityEngine.UIElements;
 
 namespace Lengthy
 {
+    /// <summary>
+    /// A scrollable UI Toolkit view for displaying long-form text.
+    /// </summary>
     public class LengthyView : VisualElement
     {
         private const string DefaultStyleSheetResourcePath = "DefaultLengthyUss";
 
+        /// <summary>
+        /// Creates a view that displays the contents of a text asset as a single item.
+        /// </summary>
+        /// <param name="textAsset">The text asset to display.</param>
+        /// <param name="title">The window title. An empty string hides the title label.</param>
+        /// <param name="alwaysIncludeDefaultStyleSheet">Whether to insert the default stylesheet into the parent even when it already has stylesheets.</param>
         public LengthyView(TextAsset textAsset, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
             : this(new []{ textAsset.text }, title, alwaysIncludeDefaultStyleSheet, null)
         {
         }
 
+        /// <summary>
+        /// Creates a view that displays a string as a single item.
+        /// </summary>
+        /// <param name="value">The text to display.</param>
+        /// <param name="title">The window title. An empty string hides the title label.</param>
+        /// <param name="alwaysIncludeDefaultStyleSheet">Whether to insert the default stylesheet into the parent even when it already has stylesheets.</param>
         public LengthyView(string value, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
             : this(new []{ value }, title, alwaysIncludeDefaultStyleSheet, null)
         {
         }
 
+        /// <summary>
+        /// Creates a view that displays each array element as a separate paragraph.
+        /// </summary>
+        /// <param name="values">The paragraphs to display.</param>
+        /// <param name="title">The window title. An empty string hides the title label.</param>
+        /// <param name="alwaysIncludeDefaultStyleSheet">Whether to insert the default stylesheet into the parent even when it already has stylesheets.</param>
         public LengthyView(string[] values, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
             :this(values, title, alwaysIncludeDefaultStyleSheet, null)
         {
@@ -106,12 +127,14 @@ namespace Lengthy
         }
 
         /// <summary>
-        /// 渡されたテキストの内容をUIで表示する.
-        /// 閉じるかキャンセルされると生成したオブジェクトを破棄する.
+        /// Displays a text asset and waits until the view is closed or canceled.
         /// </summary>
-        /// <param name="textAsset">表示するテキスト.</param>
-        /// <param name="title">タイトル.</param>
-        /// <param name="cancellationToken">キャンセルすると非表示になる. 閉じるボタン押下時にもこのTaskは完了する. キャンセルはメインスレッドから行うこと.</param>
+        /// <param name="textAsset">The text asset to display as a single item.</param>
+        /// <param name="title">The window title. An empty string hides the title label.</param>
+        /// <param name="cancellationToken">A token that closes the view when canceled. Cancellation must occur on the Unity main thread.</param>
+        /// <returns>An operation that completes when the view is closed.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="textAsset"/> is null.</exception>
+        /// <exception cref="OperationCanceledException">The operation was canceled.</exception>
         public static ValueTask ShowAsync(TextAsset textAsset, string title = "", CancellationToken cancellationToken = default)
         {
             if (textAsset == null)
@@ -122,12 +145,14 @@ namespace Lengthy
         }
 
         /// <summary>
-        /// 渡されたテキストの内容をUIで表示する.
-        /// 閉じるかキャンセルされると生成したオブジェクトを破棄する.
+        /// Displays a string and waits until the view is closed or canceled.
         /// </summary>
-        /// <param name="value">表示するテキスト.</param>
-        /// <param name="title">タイトル.</param>
-        /// <param name="cancellationToken">キャンセルすると非表示になる. 閉じるボタン押下時にもこのTaskは完了する. キャンセルはメインスレッドから行うこと.</param>
+        /// <param name="value">The text to display as a single item.</param>
+        /// <param name="title">The window title. An empty string hides the title label.</param>
+        /// <param name="cancellationToken">A token that closes the view when canceled. Cancellation must occur on the Unity main thread.</param>
+        /// <returns>An operation that completes when the view is closed.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
+        /// <exception cref="OperationCanceledException">The operation was canceled.</exception>
         public static ValueTask ShowAsync(string value, string title = "", CancellationToken cancellationToken = default)
         {
             if (value == null)
@@ -138,12 +163,14 @@ namespace Lengthy
         }
 
         /// <summary>
-        /// 渡されたテキストの内容をUIで表示する.
-        /// 閉じるかキャンセルされると生成したオブジェクトを破棄する.
+        /// Displays each array element as a separate paragraph and waits until the view is closed or canceled.
         /// </summary>
-        /// <param name="values">段落ごとに分割されたテキスト.</param>
-        /// <param name="title">タイトル.</param>
-        /// <param name="cancellationToken">キャンセルすると非表示になる. 閉じるボタン押下時にもこのTaskは完了する. キャンセルはメインスレッドから行うこと.</param>
+        /// <param name="values">The paragraphs to display.</param>
+        /// <param name="title">The window title. An empty string hides the title label.</param>
+        /// <param name="cancellationToken">A token that closes the view when canceled. Cancellation must occur on the Unity main thread.</param>
+        /// <returns>An operation that completes when the view is closed.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
+        /// <exception cref="OperationCanceledException">The operation was canceled.</exception>
         public static ValueTask ShowAsync(string[] values, string title = "", CancellationToken cancellationToken = default)
         {
             if (values == null)
