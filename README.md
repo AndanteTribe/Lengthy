@@ -9,6 +9,8 @@ English | [日本語](README_JA.md)
 ## Overview
 **Lengthy** is a UI Toolkit library for displaying long-form text in Unity.
 
+<img width="1600" height="900" alt="lengthy-license" src="https://github.com/user-attachments/assets/3383467a-7567-40cf-95f8-9504fb0f44be" />
+
 Display a `TextAsset`, a `string`, or an array of paragraphs, and await completion when the window closes. You can also add a `LengthyView` directly to an existing visual tree.
 
 - Scrollable text with dynamic-height `ListView` virtualization.
