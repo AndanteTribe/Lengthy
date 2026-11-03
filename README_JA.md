@@ -95,7 +95,7 @@ document.rootVisualElement.Add(view);
 
 `Tools > Lengthy > Rights Notation Creator` から、Lengthy で表示するサードパーティーのライセンス・権利表記をまとめて作成できます。
 
-<!-- ここに権利表記作成ツールの日本語スクリーンショットを挿入してください。 -->
+<img width="422" height="812" alt="image" src="https://github.com/user-attachments/assets/fa466f93-05d3-498f-b55d-f033eca8662f" />
 
 導入済みの UPM・NuGetForUnity パッケージを間接依存も含めて取得し、パッケージマネージャーごとに作者別で表示します。Unity 製の UPM パッケージは除外します。
 
