@@ -1,0 +1,26 @@
+{
+    "name": "Lengthy.Editor",
+    "rootNamespace": "",
+    "references": [
+        "NuGetForUnity"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "NuGetForUnity.PluginAPI.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.github-glitchenzo.nugetforunity",
+            "expression": "",
+            "define": "ENABLE_NUGETFORUNITY"
+        }
+    ],
+    "noEngineReferences": false
+}
