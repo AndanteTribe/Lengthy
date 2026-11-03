@@ -95,7 +95,7 @@ The close button removes the view from its parent. The existing `UIDocument` and
 
 Use `Tools > Lengthy > Rights Notation Creator` to assemble third-party license notices for display with Lengthy.
 
-<!-- Insert the English Rights Notation Creator screenshot here. -->
+<img width="422" height="812" alt="RightsNotationCreator-English" src="https://github.com/user-attachments/assets/9cf37a17-c622-4c4a-9d93-f1a57a62a3ce" />
 
 The window lists installed UPM and NuGetForUnity packages, including indirect dependencies, grouped by author within each package manager. It excludes Unity-authored UPM packages.
 
