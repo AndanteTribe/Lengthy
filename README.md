@@ -91,6 +91,20 @@ document.rootVisualElement.Add(view);
 
 The close button removes the view from its parent. The existing `UIDocument` and PanelSettings remain owned by your application.
 
+## Rights Notation Creator
+
+Use `Tools > Lengthy > Rights Notation Creator` to assemble third-party license notices for display with Lengthy.
+
+<img width="422" height="812" alt="RightsNotationCreator-English" src="https://github.com/user-attachments/assets/9cf37a17-c622-4c4a-9d93-f1a57a62a3ce" />
+
+The window lists installed UPM and NuGetForUnity packages, including indirect dependencies, grouped by author within each package manager. It excludes Unity-authored UPM packages.
+
+1. Enter the license text or other notices for each package. These texts are not fetched automatically.
+2. Uncheck packages to exclude them from the output. Their input fields collapse without clearing the text.
+3. Copy the result using either button:
+   - **Generate and copy as string[]**: alternating package titles and notice texts. Right-click a serialized `string[]` property in the Unity Inspector and select **Paste** to insert the array.
+   - **Generate and copy as string**: all titles and texts joined with blank lines, ready to paste into a text file or another text destination.
+
 ## API
 
 ### `LengthyView.ShowAsync`
