@@ -22,11 +22,11 @@ namespace Lengthy.Editor
             builder.Append(",\"children\":[{\"name\":\"size\",\"type\":");
             builder.Append((int)SerializedPropertyType.ArraySize);
             builder.Append(",\"val\":").Append(values.Count).Append('}');
-            foreach (var value in values)
+            for (var i = 0; i < values.Count; i++)
             {
                 builder.Append(",{\"name\":\"data\",\"type\":").Append((int)SerializedPropertyType.String);
                 builder.Append(",\"val\":");
-                AppendValue(builder, value);
+                AppendValue(builder, values[i]);
                 builder.Append('}');
             }
 
