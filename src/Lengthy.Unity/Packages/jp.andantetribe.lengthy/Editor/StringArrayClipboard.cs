@@ -32,7 +32,6 @@ namespace Lengthy.Editor
             return builder.Append("]}]}").ToString();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void AppendValue(StringBuilder builder, string value)
         {
             _ = builder.Append('"');
