@@ -13,7 +13,7 @@ namespace System.Threading
             var restoreFlow = false;
             if (!ExecutionContext.IsFlowSuppressed())
             {
-                ExecutionContext.SuppressFlow();
+                _ = ExecutionContext.SuppressFlow();
                 restoreFlow = true;
             }
 

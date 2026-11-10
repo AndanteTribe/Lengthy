@@ -6,7 +6,7 @@ namespace Lengthy.Internal
 {
     internal readonly struct Unit : IEquatable<Unit>
     {
-        public static readonly Unit Default = new Unit();
+        public static readonly Unit Default = new();
 
         public override int GetHashCode() => 0;
 

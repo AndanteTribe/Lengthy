@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 using UnityEngine;
 using UnityEngine.UIElements;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace Lengthy.Editor
 {
@@ -32,7 +32,7 @@ namespace Lengthy.Editor
                 Text = "";
             }
 
-            public int CompareTo(Entry other)
+            public readonly int CompareTo(Entry other)
             {
                 var managerComparison = ((byte)Manager).CompareTo((byte)other.Manager);
                 return managerComparison != 0
