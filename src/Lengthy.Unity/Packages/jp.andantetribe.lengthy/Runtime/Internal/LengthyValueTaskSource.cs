@@ -102,7 +102,7 @@ namespace Lengthy.Internal
         {
             try
             {
-                _core.GetResult(token);
+                _ = _core.GetResult(token);
             }
             finally
             {

@@ -23,7 +23,7 @@ namespace Lengthy
         /// <param name="title">The window title. An empty string hides the title label.</param>
         /// <param name="alwaysIncludeDefaultStyleSheet">Whether to insert the default stylesheet into the parent even when it already has stylesheets.</param>
         public LengthyView(TextAsset textAsset, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
-            : this(new []{ textAsset.text }, title, alwaysIncludeDefaultStyleSheet, null)
+            : this(new[] { textAsset.text }, title, alwaysIncludeDefaultStyleSheet, null)
         {
         }
 
@@ -34,7 +34,7 @@ namespace Lengthy
         /// <param name="title">The window title. An empty string hides the title label.</param>
         /// <param name="alwaysIncludeDefaultStyleSheet">Whether to insert the default stylesheet into the parent even when it already has stylesheets.</param>
         public LengthyView(string value, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
-            : this(new []{ value }, title, alwaysIncludeDefaultStyleSheet, null)
+            : this(new[] { value }, title, alwaysIncludeDefaultStyleSheet, null)
         {
         }
 
@@ -45,7 +45,7 @@ namespace Lengthy
         /// <param name="title">The window title. An empty string hides the title label.</param>
         /// <param name="alwaysIncludeDefaultStyleSheet">Whether to insert the default stylesheet into the parent even when it already has stylesheets.</param>
         public LengthyView(string[] values, string title = "", bool alwaysIncludeDefaultStyleSheet = false)
-            :this(values, title, alwaysIncludeDefaultStyleSheet, null)
+            : this(values, title, alwaysIncludeDefaultStyleSheet, null)
         {
         }
 
@@ -82,17 +82,11 @@ namespace Lengthy
             closeButton.AddToClassList("lengthy-close-button");
             if (valueTaskSource != null)
             {
-                closeButton.RegisterCallbackOnce<ClickEvent, LengthyValueTaskSource>(static (_, vts) =>
-                {
-                    vts.SetResult();
-                }, valueTaskSource);
+                closeButton.RegisterCallbackOnce<ClickEvent, LengthyValueTaskSource>(static (_, vts) => vts.SetResult(), valueTaskSource);
             }
             else
             {
-                closeButton.RegisterCallback<ClickEvent, LengthyView>(static (_, view) =>
-                {
-                    view.RemoveFromHierarchy();
-                }, this);
+                closeButton.RegisterCallback<ClickEvent, LengthyView>(static (_, view) => view.RemoveFromHierarchy(), this);
             }
             topBar.Add(closeButton);
 
